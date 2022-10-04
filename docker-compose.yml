@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+
+  api:
+    build: $PWD
+    command: uvicorn app:app --reload --workers 1 --host 0.0.0.0 --port 8000
+    volumes:
+      - $PWD/notifications_poc:/app
+    ports:
+      - 8000:8000
+
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - 9090:9090
+    expose:
+      - 9090
+    volumes:
+      - $PWD/prometheus.yml:/etc/prometheus/prometheus.yml
+      - $PWD/alert.rules.yml:/etc/prometheus/alert.rules.yml
+      - $PWD/prometheus-data:/prometheus
+    depends_on:
+      - api
+
+  alertmanager:
+    restart: always
+    image: prom/alertmanager
+    ports:
+      - 9093:9093
+    expose:
+      - 9093
+    container_name: alertmanager
+    volumes:
+      - ${PWD}/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+    depends_on:
+      - prometheus
