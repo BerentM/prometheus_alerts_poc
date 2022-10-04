@@ -19,7 +19,6 @@ app.add_middleware(
 
 @app.post("/api/v2/alerts")
 async def notify_me(data: Request):
-    print('dupa')
     print(await data.json())
     return
 
